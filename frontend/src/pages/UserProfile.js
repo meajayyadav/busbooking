@@ -216,15 +216,43 @@ const UserProfile = ({ user, logout }) => {
                   </div>
                 </div>
 
-                {booking.payment_status === 'completed' && (
-                  <button
-                    className="book-btn"
-                    onClick={() => downloadTicket(booking.id)}
-                    data-testid={`download-ticket-${booking.id}`}
-                  >
-                    Download Ticket
-                  </button>
-                )}
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  {booking.payment_status === 'completed' && booking.status === 'confirmed' && (
+                    <button
+                      className="book-btn"
+                      onClick={() => downloadTicket(booking.id)}
+                      data-testid={`download-ticket-${booking.id}`}
+                    >
+                      Download Ticket
+                    </button>
+                  )}
+                  
+                  {booking.payment_status === 'pending' && booking.status === 'pending' && (
+                    <>
+                      <button
+                        className="book-btn"
+                        onClick={() => retryPayment(booking.id)}
+                        data-testid={`retry-payment-${booking.id}`}
+                      >
+                        Retry Payment
+                      </button>
+                      <button
+                        className="book-btn"
+                        onClick={() => cancelBooking(booking.id)}
+                        style={{ background: '#F44336' }}
+                        data-testid={`cancel-booking-${booking.id}`}
+                      >
+                        Cancel Booking
+                      </button>
+                    </>
+                  )}
+                  
+                  {booking.status === 'cancelled' && (
+                    <div style={{ color: '#F44336', fontWeight: '600' }}>
+                      This booking has been cancelled
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
