@@ -272,6 +272,23 @@ async def get_booking(booking_id: str, current_user: dict = Depends(get_current_
     booking['bus_details'] = bus
     return booking
 
+@api_router.delete("/bookings/{booking_id}")
+async def cancel_booking(booking_id: str, current_user: dict = Depends(get_current_user)):
+    booking = await db.bookings.find_one({"id": booking_id, "user_id": current_user['id']}, {"_id": 0})
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if booking['status'] == 'confirmed':
+        raise HTTPException(status_code=400, detail="Cannot cancel confirmed booking")
+    
+    # Update booking status
+    await db.bookings.update_one(
+        {"id": booking_id},
+        {"$set": {"status": "cancelled"}}
+    )
+    
+    return {"message": "Booking cancelled successfully"}
+
 @api_router.get("/bookings/{booking_id}/download")
 async def download_ticket(booking_id: str, current_user: dict = Depends(get_current_user)):
     booking = await db.bookings.find_one({"id": booking_id, "user_id": current_user['id']}, {"_id": 0})
