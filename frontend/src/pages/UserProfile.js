@@ -55,6 +55,57 @@ const UserProfile = ({ user, logout }) => {
     }
   };
 
+  const retryPayment = async (bookingId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/create-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          booking_id: bookingId,
+          host_url: window.location.origin
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        window.location.href = data.url;
+      } else {
+        toast.error('Failed to initiate payment');
+      }
+    } catch (error) {
+      toast.error('An error occurred');
+    }
+  };
+
+  const cancelBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/bookings/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Booking cancelled successfully');
+        fetchBookings();
+      } else {
+        const data = await response.json();
+        toast.error(data.detail || 'Failed to cancel booking');
+      }
+    } catch (error) {
+      toast.error('An error occurred');
+    }
+  };
+
   return (
     <div>
       <nav className="navbar" data-testid="navbar">
